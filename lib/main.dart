@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart' show visibleForTesting;
 
 void main() {
   // debugPaintSizeEnabled = true;
@@ -31,6 +36,10 @@ class RandomWords extends StatefulWidget {
 }
 
 class RandomWordsState extends State<RandomWords> {
+  @visibleForTesting
+  static const MethodChannel channel =
+      const MethodChannel('sample.ko2ic/toPlattformScreen');
+
   final _suggestions = <WordPair>[];
   final _saved = new Set<WordPair>();
   final _biggerFont = const TextStyle(fontSize: 18.0);
@@ -41,13 +50,23 @@ class RandomWordsState extends State<RandomWords> {
       appBar: new AppBar(
         title: new Text('Startup Name Generator'),
         actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.adb), onPressed: _pushSaved),
+          new IconButton(
+              icon: new Icon(Icons.adb),
+              onPressed: _toPlattformScreen),
           new IconButton(icon: new Icon(Icons.grade), onPressed: _pushSaved),
         ],
       ),
       body: _buildSuggestions(),
     );
   }
+
+   _toPlattformScreen()  {
+    try{
+       channel.invokeMethod('toPlattformScreen');
+    }on PlatformException catch (e){
+      print(e);
+    }
+   }
 
   Widget _buildRow(WordPair pair, int index) {
     final alreadySaved = _saved.contains(pair);
