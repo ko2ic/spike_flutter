@@ -1,11 +1,14 @@
 import 'dart:async';
 
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:flutter/services.dart';
+
+import 'package:flutter_search_bar/flutter_search_bar.dart';
+
 import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:spike_flutter/domains/Github.dart';
+import 'package:spike_flutter/domains/entities/repo_entity.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -16,38 +19,74 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primaryColor: Colors.green,
       ),
-      home: new RandomWords(),
+      home: new GithubListPage(),
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
+class GithubListPage extends StatefulWidget {
   @override
-  createState() => new RandomWordsState();
+  createState() => new GithubListPageState();
 }
 
-class RandomWordsState extends State<RandomWords> {
+class GithubListPageState extends State<GithubListPage> {
   @visibleForTesting
-  static const MethodChannel channel =
-  const MethodChannel('sample.ko2ic/toPlattformScreen');
+  static const MethodChannel channel = const MethodChannel('sample.ko2ic/toPlattformScreen');
 
-  final _suggestions = <WordPair>[];
-  final _saved = new Set<WordPair>();
+  SearchBar searchBar;
   final _biggerFont = const TextStyle(fontSize: 18.0);
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  List<RepoEntity> _repos = [];
+  final _saved = new Set<RepoEntity>();
+
+  GithubListPageState(){
+    searchBar = new SearchBar(
+        inBar: false,
+        setState: setState,
+        onSubmitted: onSubmitted,
+        buildDefaultAppBar: buildAppBar
+    );
+  }
+
+  AppBar buildAppBar(BuildContext context) {
+    return new AppBar(
+      title: new Text('GitHub検索'),
+      actions: <Widget>[
+        new IconButton(
+            icon: new Icon(Icons.adb),
+            onPressed: _toPlattformScreen),
+            searchBar.getSearchAction(context),
+      ],
+    );
+  }
+
+  void onSubmitted(String freeword) {
+    setState(() => _fetch(freeword));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch("ko2ic");
+  }
+
+   _fetch(String freeword)  {
+    new Github().fetch(freeword)
+        .then((s) => setRepos(s.items));
+  }
+
+  void setRepos(List<RepoEntity> repos) {
+    setState(() => _repos = repos);
+  }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Startup Name Generator'),
-        actions: <Widget>[
-          new IconButton(
-              icon: new Icon(Icons.adb),
-              onPressed: _toPlattformScreen),
-          new IconButton(icon: new Icon(Icons.grade), onPressed: _pushSaved),
-        ],
-      ),
-      body: _buildSuggestions(),
+      appBar: searchBar.build(context),
+      key: _scaffoldKey,
+      body: _buildList(),
     );
   }
 
@@ -59,12 +98,18 @@ class RandomWordsState extends State<RandomWords> {
     }
   }
 
-  Widget _buildRow(WordPair pair, int index) {
-    final alreadySaved = _saved.contains(pair);
-    return new ListTile(
+  Widget _buildRow(RepoEntity entity) {
+    final alreadySaved = _saved.contains(entity);
+    return new Container(
+      child: new Column(
+        children: <Widget>[
+      new ListTile(
       title: new Text(
-        pair.asPascalCase,
+        entity.fullName,
         style: _biggerFont,
+      ),
+      subtitle: new Text(
+          entity.stars.toString()
       ),
       trailing: new IconButton(
           icon: new Icon(
@@ -74,73 +119,28 @@ class RandomWordsState extends State<RandomWords> {
           onPressed: () {
             setState(() {
               if (alreadySaved) {
-                _saved.remove(pair);
+                _saved.remove(entity);
               } else {
-                _saved.add(pair);
+                _saved.add(entity);
               }
             });
           }),
       onTap: () {
         setState(() {
-          if (_saved.contains(this._suggestions[index])) {
-            _saved.remove(this._suggestions[index]);
-          }
-          this._suggestions.removeAt(index);
         });
-      },
-    );
-  }
-
-  Widget _buildSuggestions() {
-    return new ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          // Add a one-pixel-high divider widget before each row in theListView.
-          if (i.isOdd) return new Divider();
-
-          // The syntax "i ~/ 2" divides i by 2 and returns an integer result.
-          // For example: 1, 2, 3, 4, 5 becomes 0, 1, 1, 2, 2.
-          // This calculates the actual number of word pairings in the ListView,
-          // minus the divider widgets.
-          final index = i ~/ 2;
-          // If you've reached the end of the available word pairings...
-          if (index >= _suggestions.length) {
-            // ...then generate 10 more and add them to the suggestions list.
-            _suggestions.addAll(generateWordPairs().take(10));
-          }
-          return _buildRow(_suggestions[index], index);
-        });
-  }
-
-  void _pushSaved() {
-    Navigator.of(context).push(
-      new MaterialPageRoute(
-        builder: (context) {
-          final tiles = _saved.map(
-                (pair) {
-              return new ListTile(
-                title: new Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final divided = ListTile
-              .divideTiles(
-            context: context,
-            tiles: tiles,
-          )
-              .toList();
-          // お気に入り一覧ページ
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text('Saved Suggestions'),
-            ),
-            body: new ListView(children: divided),
-          );
-        },
+      }),
+        new Divider(),
+        ],
       ),
     );
+  }
+
+  Widget _buildList() {
+    return new ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: _repos.length,
+        itemBuilder: (context, i) {
+          return _buildRow(_repos[i]);
+        });
   }
 }
