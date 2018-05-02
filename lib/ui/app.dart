@@ -9,6 +9,7 @@ import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:spike_flutter/domains/Github.dart';
 import 'package:spike_flutter/domains/entities/repo_entity.dart';
+import 'package:spike_flutter/ui/loading_widget.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -31,7 +32,8 @@ class GithubListPage extends StatefulWidget {
 
 class GithubListPageState extends State<GithubListPage> {
   @visibleForTesting
-  static const MethodChannel channel = const MethodChannel('sample.ko2ic/toPlattformScreen');
+  static const MethodChannel channel =
+      const MethodChannel('sample.ko2ic/toPlattformScreen');
 
   SearchBar searchBar;
   final _biggerFont = const TextStyle(fontSize: 18.0);
@@ -39,15 +41,16 @@ class GithubListPageState extends State<GithubListPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<RepoEntity> _repos = [];
+  bool _isLoading = false;
+
   final _saved = new Set<RepoEntity>();
 
-  GithubListPageState(){
+  GithubListPageState() {
     searchBar = new SearchBar(
         inBar: false,
         setState: setState,
         onSubmitted: onSubmitted,
-        buildDefaultAppBar: buildAppBar
-    );
+        buildDefaultAppBar: buildAppBar);
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -55,9 +58,8 @@ class GithubListPageState extends State<GithubListPage> {
       title: new Text('GitHub検索'),
       actions: <Widget>[
         new IconButton(
-            icon: new Icon(Icons.adb),
-            onPressed: _toPlattformScreen),
-            searchBar.getSearchAction(context),
+            icon: new Icon(Icons.adb), onPressed: _toPlattformScreen),
+        searchBar.getSearchAction(context),
       ],
     );
   }
@@ -69,15 +71,22 @@ class GithubListPageState extends State<GithubListPage> {
   @override
   void initState() {
     super.initState();
-    _fetch("ko2ic");
+    _fetch("ko2");
   }
 
-   _fetch(String freeword)  {
-    new Github().fetch(freeword)
-        .then((s) => setRepos(s.items));
+  _fetch(String freeword) {
+    _setLoading(true);
+    new Github()
+        .fetch(freeword)
+        .then((s) => _setRepos(s.items))
+        .whenComplete(() => _setLoading(false));
   }
 
-  void setRepos(List<RepoEntity> repos) {
+  _setLoading(bool isLoading) {
+    setState(() => this._isLoading = isLoading);
+  }
+
+  _setRepos(List<RepoEntity> repos) {
     setState(() => _repos = repos);
   }
 
@@ -90,10 +99,10 @@ class GithubListPageState extends State<GithubListPage> {
     );
   }
 
-  _toPlattformScreen()  {
-    try{
+  _toPlattformScreen() {
+    try {
       channel.invokeMethod('toPlattformScreen');
-    }on PlatformException catch (e){
+    } on PlatformException catch (e) {
       print(e);
     }
   }
@@ -103,44 +112,46 @@ class GithubListPageState extends State<GithubListPage> {
     return new Container(
       child: new Column(
         children: <Widget>[
-      new ListTile(
-      title: new Text(
-        entity.fullName,
-        style: _biggerFont,
-      ),
-      subtitle: new Text(
-          entity.stars.toString()
-      ),
-      trailing: new IconButton(
-          icon: new Icon(
-            alreadySaved ? Icons.favorite : Icons.favorite_border,
-            color: alreadySaved ? Colors.red : null,
-          ),
-          onPressed: () {
-            setState(() {
-              if (alreadySaved) {
-                _saved.remove(entity);
-              } else {
-                _saved.add(entity);
-              }
-            });
-          }),
-      onTap: () {
-        setState(() {
-        });
-      }),
-        new Divider(),
+          new ListTile(
+              title: new Text(
+                entity.fullName,
+                style: _biggerFont,
+              ),
+              subtitle: new Text(entity.stars.toString()),
+              trailing: new IconButton(
+                  icon: new Icon(
+                    alreadySaved ? Icons.favorite : Icons.favorite_border,
+                    color: alreadySaved ? Colors.red : null,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (alreadySaved) {
+                        _saved.remove(entity);
+                      } else {
+                        _saved.add(entity);
+                      }
+                    });
+                  }),
+              onTap: () {
+                setState(() {});
+              }),
+          new Divider(),
         ],
       ),
     );
   }
 
   Widget _buildList() {
-    return new ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: _repos.length,
-        itemBuilder: (context, i) {
-          return _buildRow(_repos[i]);
-        });
+    return new LoadingWidget(
+      isLoading: this._isLoading,
+      onCompleted: () {
+        return new ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: _repos.length,
+            itemBuilder: (context, i) {
+              return _buildRow(_repos[i]);
+            });
+      },
+    );
   }
 }
