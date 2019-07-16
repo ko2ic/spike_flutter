@@ -86,9 +86,10 @@ class GithubListPageState extends State<GithubListPage> {
     );
   }
 
-  _toPlatformScreen() {
+  _toPlatformScreen() async {
     try {
-      channel.invokeMethod('toPlatformScreen');
+      var result = await channel.invokeMethod('toPlatformScreen', <String, dynamic>{"label_from_dart": "Label From Dart"});
+      print(result);
     } on PlatformException catch (e) {
       print(e);
     }

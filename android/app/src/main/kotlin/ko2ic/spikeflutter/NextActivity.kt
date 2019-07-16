@@ -1,11 +1,11 @@
 package ko2ic.spikeflutter
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 
 
 class NextActivity : AppCompatActivity() {
@@ -20,7 +20,7 @@ class NextActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_next)
 
-        val toolbar =findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -28,5 +28,8 @@ class NextActivity : AppCompatActivity() {
             this@NextActivity.finish()
         }
         supportActionBar?.setTitle("Title")
+
+        val label = findViewById<TextView>(R.id.label)
+        label.text = intent.extras!!["label"] as String
     }
 }
