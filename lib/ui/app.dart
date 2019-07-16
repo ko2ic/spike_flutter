@@ -1,11 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_search_bar/flutter_search_bar.dart';
-
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:spike_flutter/domains/Github.dart';
 import 'package:spike_flutter/domains/entities/repo_entity.dart';
@@ -15,57 +11,51 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Flutter Demo',
-      theme: new ThemeData(
+      theme: ThemeData(
         primaryColor: Colors.green,
       ),
-      home: new GithubListPage(),
+      home: GithubListPage(),
     );
   }
 }
 
 class GithubListPage extends StatefulWidget {
   @override
-  createState() => new GithubListPageState();
+  createState() => GithubListPageState();
 }
 
 class GithubListPageState extends State<GithubListPage> {
   @visibleForTesting
-  static const MethodChannel channel =
-      const MethodChannel('sample.ko2ic/toPlattformScreen');
+  static const MethodChannel channel = MethodChannel('sample.ko2ic/toPlatformScreen');
 
   SearchBar searchBar;
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<RepoEntity> _repos = [];
   bool _isLoading = false;
 
-  final _saved = new Set<RepoEntity>();
+  final _saved = Set<RepoEntity>();
 
   GithubListPageState() {
-    searchBar = new SearchBar(
-        inBar: false,
-        setState: setState,
-        onSubmitted: onSubmitted,
-        buildDefaultAppBar: buildAppBar);
+    searchBar = SearchBar(inBar: false, setState: setState, onSubmitted: onSubmitted, buildDefaultAppBar: buildAppBar);
   }
 
   AppBar buildAppBar(BuildContext context) {
-    return new AppBar(
-      title: new Text('GitHub検索'),
+    return AppBar(
+      title: const Text('GitHub検索'),
       actions: <Widget>[
-        new IconButton(
-            icon: new Icon(Icons.adb), onPressed: _toPlattformScreen),
+        IconButton(icon: Icon(Icons.adb), onPressed: _toPlatformScreen),
         searchBar.getSearchAction(context),
       ],
     );
   }
 
-  void onSubmitted(String freeword) {
-    setState(() => _fetch(freeword));
+  void onSubmitted(String freeWord) {
+    setState(() => _fetch(freeWord));
   }
 
   @override
@@ -74,12 +64,9 @@ class GithubListPageState extends State<GithubListPage> {
     _fetch("ko2");
   }
 
-  _fetch(String freeword) {
+  _fetch(String freeWord) {
     _setLoading(true);
-    new Github()
-        .fetch(freeword)
-        .then((s) => _setRepos(s.items))
-        .whenComplete(() => _setLoading(false));
+    Github().fetch(freeWord).then((s) => _setRepos(s.items)).whenComplete(() => _setLoading(false));
   }
 
   _setLoading(bool isLoading) {
@@ -92,16 +79,16 @@ class GithubListPageState extends State<GithubListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       appBar: searchBar.build(context),
       key: _scaffoldKey,
       body: _buildList(),
     );
   }
 
-  _toPlattformScreen() {
+  _toPlatformScreen() {
     try {
-      channel.invokeMethod('toPlattformScreen');
+      channel.invokeMethod('toPlatformScreen');
     } on PlatformException catch (e) {
       print(e);
     }
@@ -109,17 +96,17 @@ class GithubListPageState extends State<GithubListPage> {
 
   Widget _buildRow(RepoEntity entity) {
     final alreadySaved = _saved.contains(entity);
-    return new Container(
-      child: new Column(
+    return Container(
+      child: Column(
         children: <Widget>[
-          new ListTile(
-              title: new Text(
+          ListTile(
+              title: Text(
                 entity.fullName,
                 style: _biggerFont,
               ),
-              subtitle: new Text(entity.stars.toString()),
-              trailing: new IconButton(
-                  icon: new Icon(
+              subtitle: Text(entity.stars.toString()),
+              trailing: IconButton(
+                  icon: Icon(
                     alreadySaved ? Icons.favorite : Icons.favorite_border,
                     color: alreadySaved ? Colors.red : null,
                   ),
@@ -135,17 +122,17 @@ class GithubListPageState extends State<GithubListPage> {
               onTap: () {
                 setState(() {});
               }),
-          new Divider(),
+          Divider(),
         ],
       ),
     );
   }
 
   Widget _buildList() {
-    return new LoadingWidget(
+    return LoadingWidget(
       isLoading: this._isLoading,
       onCompleted: () {
-        return new ListView.builder(
+        return ListView.builder(
             padding: const EdgeInsets.all(16.0),
             itemCount: _repos.length,
             itemBuilder: (context, i) {

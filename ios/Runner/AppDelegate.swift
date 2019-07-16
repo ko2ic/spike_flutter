@@ -10,12 +10,12 @@ import UIKit
         GeneratedPluginRegistrant.register(with: self)
 
         let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
-        let batteryChannel = FlutterMethodChannel(name: "sample.ko2ic/toPlattformScreen",
+        let batteryChannel = FlutterMethodChannel(name: "sample.ko2ic/toPlatformScreen",
                                                   binaryMessenger: controller)
         batteryChannel.setMethodCallHandler({
             (call: FlutterMethodCall, result: FlutterResult) -> Void in
-            if "toPlattformScreen" == call.method {
-                self.toPlattformScreen()
+            if "toPlatformScreen" == call.method {
+                self.toPlatformScreen()
                 result(true)
             } else {
                 result(FlutterMethodNotImplemented)
@@ -25,7 +25,7 @@ import UIKit
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
-    func toPlattformScreen() {
+    func toPlatformScreen() {
         let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
         let storyboard: UIStoryboard = UIStoryboard(name: "Next", bundle: nil)
         let next = storyboard.instantiateInitialViewController()

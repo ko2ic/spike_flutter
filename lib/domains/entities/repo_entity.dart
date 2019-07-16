@@ -18,14 +18,14 @@ class RepoEntity {
   factory RepoEntity.fromJson(Map<String, dynamic> json) {
 
     var permissions = json['permissions'];
-    PermissionDto dto = new PermissionDto();
+    PermissionDto dto = PermissionDto();
     if (permissions != null){
       dto.haveAdmin = permissions['admin'] ?? false;
-      dto.havePushAuthorizetion = permissions['push'] ?? false;
-      dto.havePullAuthorizetion = permissions['pull'] ?? false;
+      dto.havePushAuthorization = permissions['push'] ?? false;
+      dto.havePullAuthorization = permissions['pull'] ?? false;
     }
 
-    return new RepoEntity(
+    return RepoEntity(
       name: json['name'],
       fullName: json['full_name'],
       stars: json['stargazers_count'],

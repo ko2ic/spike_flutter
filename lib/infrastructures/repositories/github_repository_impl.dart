@@ -7,7 +7,7 @@ import 'package:spike_flutter/infrastructures/repositories/http/github_http_clie
 class GithubRepositoryImpl {
 
   Future<SearchResultDto> fetch(String freeword){
-    GithubHttpClient client = new GithubHttpClient();
+    GithubHttpClient client = GithubHttpClient();
     return client.fetch(freeword);
   }
 }

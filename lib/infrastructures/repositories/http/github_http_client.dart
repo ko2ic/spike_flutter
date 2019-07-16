@@ -12,6 +12,6 @@ class GithubHttpClient {
   Future<SearchResultDto> fetch(String freewore) async {
     final response = await http.get("$_BASE_URL/search/repositories?q=$freewore&page=1");
     final responseJson = json.decode(response.body);
-    return new SearchResultDto.fromJson(responseJson);
+    return SearchResultDto.fromJson(responseJson);
   }
 }

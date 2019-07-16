@@ -2,7 +2,7 @@
 class PermissionDto {
 
   bool haveAdmin;
-  bool havePushAuthorizetion;
-  bool havePullAuthorizetion;
+  bool havePushAuthorization;
+  bool havePullAuthorization;
 
 }

@@ -8,7 +8,7 @@ class Github {
 
   Future<SearchResultDto> fetch(String freeword){
     // TODO ここはインターフェイスにする
-    var repository = new GithubRepositoryImpl();
+    var repository = GithubRepositoryImpl();
     return repository.fetch(freeword);
   }
 }

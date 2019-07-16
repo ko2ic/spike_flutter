@@ -1,11 +1,10 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 typedef T Func0<T>();
 
-class LoadingWidget  extends StatelessWidget {
+class LoadingWidget extends StatelessWidget {
   final bool isLoading;
   final Func0<Widget> onCompleted;
 
@@ -14,11 +13,11 @@ class LoadingWidget  extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return new Center(
-        child: new CircularProgressIndicator(),
+      return const Center(
+        child: CircularProgressIndicator(),
       );
-      }else{
-        return onCompleted();
+    } else {
+      return onCompleted();
     }
   }
 }

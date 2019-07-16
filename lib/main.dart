@@ -8,5 +8,5 @@ void main() {
 //  debugPaintPointersEnabled = true;
 //  debugPaintLayerBordersEnabled = true;
 //  debugRepaintRainbowEnabled = true;
-  runApp(new MyApp());
+  runApp(MyApp());
 }
