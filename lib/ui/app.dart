@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -48,7 +50,10 @@ class GithubListPageState extends State<GithubListPage> {
     return AppBar(
       title: const Text('GitHub検索'),
       actions: <Widget>[
-        IconButton(icon: Icon(Icons.adb), onPressed: _toPlatformScreen),
+        IconButton(
+          icon: Platform.isAndroid ? Icon(Icons.android) : Icon(Icons.phone_iphone),
+          onPressed: _toPlatformScreen,
+        ),
         searchBar.getSearchAction(context),
       ],
     );
