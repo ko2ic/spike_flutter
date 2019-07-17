@@ -62,6 +62,16 @@ class GithubListPageState extends State<GithubListPage> {
   void initState() {
     super.initState();
     _fetch("ko2");
+
+    channel.setMethodCallHandler((MethodCall call) {
+      switch (call.method) {
+        case "onClosed":
+          var map = call.arguments.cast<String, String>();
+          print(map["from_platform"]);
+          break;
+      }
+      return;
+    });
   }
 
   _fetch(String freeWord) {

@@ -1,5 +1,6 @@
 package ko2ic.spikeflutter
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,7 +13,7 @@ class NextActivity : AppCompatActivity() {
 
     companion object {
         fun intent(context: Context) = Intent(context, NextActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            //flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         }
     }
 
@@ -25,6 +26,7 @@ class NextActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
+            this@NextActivity.setResult(Activity.RESULT_OK, intent)
             this@NextActivity.finish()
         }
         supportActionBar?.setTitle("Title")

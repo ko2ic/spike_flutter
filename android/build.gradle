@@ -33,9 +33,9 @@ task clean(type: Delete) {
 configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         def requested = details.requested
-        if (requested.group == "androidx.appcompat") {
+        if (requested.group == "androidx") {
             if (!requested.name.startsWith("multidex")) {
-                details.useVersion "1.+"
+                details.useVersion "${targetSdk}.+"
             }
         }
     }
